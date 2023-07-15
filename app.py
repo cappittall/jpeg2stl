@@ -90,6 +90,7 @@ def calculate_stl(pixel_values, main_colors, heights, step):
     stl_file_path = f"data/stl/{filename}"
     stl_mesh.save(stl_file_path)
     print('Bitti...')
+    st.experimental_rerun()
     
 def main():
     global file, n_main_colors, main_colors, heights, step
