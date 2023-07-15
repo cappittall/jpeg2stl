@@ -12,7 +12,8 @@ from tools.tools import load_env
 
 path = "data/files"
 file = ""
-load_env()
+
+# load_env()
 
 n_main_colors = 5
 main_colors = []
