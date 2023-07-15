@@ -1,3 +1,4 @@
+pip==23.2
 chainlit==0.5.2
 langchain==0.0.233
 numpy==1.25.0
