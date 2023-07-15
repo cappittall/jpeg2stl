@@ -1,2 +1,5 @@
 *.stl
 .env
+.chainlit
+applit.py
+openai*.py
