@@ -60,15 +60,13 @@ if image_file is not None:
     gcv_image = pil_image_to_gcv_image(_img)
    
     extracted_text = extract_text_from_image(gcv_image)
-    print('Extracted text with google', extracted_text)
-    st.write(f'Extracted text with google: {extracted_text}')
-    
+    st.header('Extracted text with google:')
+    st.write(f' {extracted_text}')
     
     
     extracted_text2 = pytesseract.image_to_string(_img)
-    print('Extracted text', extracted_text2)
- 
-    st.write(f'Extracted text with pytesseract:{extracted_text2}')
+    st.header('Extracted text with pytesseract:')
+    st.write(f'{extracted_text2}')
 
     
  
