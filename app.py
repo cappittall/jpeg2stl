@@ -1,7 +1,14 @@
 import os
 import numpy as np
+import time
 
-from stl import mesh
+from pygltflib import GLTF2, Primitive, Mesh, Material, PbrMetallicRoughness, Node, Scene, Buffer, BufferView, Accessor
+import pygltflib
+
+from trimesh import creation
+import trimesh
+import numpy as np
+
 from PIL import Image
 from sklearn.cluster import KMeans
 from scipy.spatial import distance
@@ -18,9 +25,10 @@ file = ""
 n_main_colors = 5
 main_colors = []
 heights = {}
+EXPORT_FILE_FORMAT = 'gltf'
 
 def download_file(fn):
-    with open(f"data/stl/{fn}", 'rb') as file:
+    with open(f"data/{EXPORT_FILE_FORMAT}/{fn}", 'rb') as file:
         contents = file.read()
         st.sidebar.download_button(
             label="Yüklemek için tıklayınız",
@@ -66,43 +74,90 @@ def calculate_height_based_on_color(color, main_colors, heights):
         # Retrieve the height value from the heights dictionary for the closest color
         return heights[conv_closest_color]
     
+def create_materials(main_colors):
 
-def calculate_stl(pixel_values, main_colors, heights, step):
-    vertices = []
-    faces = []
+  materials = {}
 
-    for i in range(0, pixel_values.shape[0], step):
-        for j in range(0, pixel_values.shape[1], step):
-            color = tuple(pixel_values[i][j])
-            height = calculate_height_based_on_color(color, main_colors, heights)
-            vertices.append([i, j, height])
+  for color in main_colors:
+    mat = Material(name=str(color)) 
+    pbr = PbrMetallicRoughness(baseColorFactor=list(color/255))
+    mat.pbrMetallicRoughness = pbr
+    materials[str(color)] = mat
 
-            if i > 0 and j > 0:
-                faces.append([len(vertices) - 1, len(vertices) - 2, len(vertices) - pixel_values.shape[1]//step - 2])
-            if i > 0 and j < pixel_values.shape[1] - 1:
-                faces.append([len(vertices) - 1, len(vertices) - pixel_values.shape[1]//step - 2, len(vertices) - pixel_values.shape[1]//step - 1])
+  return materials
 
-    stl_mesh = mesh.Mesh(np.zeros(len(faces), dtype=mesh.Mesh.dtype))
-    for i, face in enumerate(faces):
-        for j in range(3):
-            stl_mesh.vectors[i][j] = vertices[face[j] // step]
+def convert_jpg_to_gltf(pixel_values, main_colors, heights, step):
+    # Initialize GLTF object
+    gltf = GLTF2()
 
-    filename = file.name.replace('jpeg', 'stl')
-    stl_file_path = f"data/stl/{filename}"
-    stl_mesh.save(stl_file_path)
-    print('Bitti...')
+    # Create buffer and add to gltf
+    buffer = Buffer()
+    gltf.buffers.append(buffer)
+
+    # Create buffer view
+    buffer_view = BufferView(buffer=0, byteLength=0)
+
+    # Create accessor for vertex positions
+    accessor = Accessor(bufferView=0, byteOffset=0, componentType=pygltflib.FLOAT, count=len(pixel_values), type=pygltflib.VEC3)
+
+    # Initialize vertex positions array
+    positions = np.zeros((len(pixel_values), 3))
+
+    height, width, channels = pixel_values.shape
+    for i in range(pixel_values.shape[0]):  # height
+        for j in range(pixel_values.shape[1]):  # width
+            color = pixel_values[i, j]
+            z = calculate_height_based_on_color(color, main_colors, heights)
+
+            # Set position with z
+            positions[i * width + j] = [j * step, i * step, z]
+
+    # Set position buffer data
+    buffer.data += positions.tobytes()
+    buffer_view.byteLength += positions.nbytes
+
+    # Create materials
+    materials = []
+    for main_color in main_colors:
+        pbr = PbrMetallicRoughness(baseColorFactor=[main_color[0] / 255.0,
+                                                    main_color[1] / 255.0,
+                                                    main_color[2] / 255.0,
+                                                    1.0]
+                                   )
+        material = Material(pbrMetallicRoughness=pbr)
+        materials.append(material)
+        gltf.materials.append(material)
+
+    # Create mesh
+    mesh = Mesh(name="mesh")
+    primitive = Primitive(attributes={"POSITION": accessor}, material=0)
+    mesh.primitives = [primitive]
+
+    # Create node and scene
+    node = Node(mesh=mesh)
+    scene = Scene(nodes=[node])
+
+    # Finalize glTF
+    gltf.scenes = [scene]
+    gltf.scene = 0
+
+    # Save GLTF to a file
+    filename = f"yeni_{file.name.rsplit('.', 1)[0][:10]}_{int(time.time())}.{EXPORT_FILE_FORMAT}"
+    gltf_file_path = f"data/{EXPORT_FILE_FORMAT}/{filename}"
+    gltf.save(gltf_file_path)
+
     st.experimental_rerun()
     
 def main():
     global file, n_main_colors, main_colors, heights, step
     with st.sidebar: 
-        file = st.file_uploader('Dosyayı sürükleyin yada yükleyin', type=["jpeg"], help='Stl ye çevrilecek dosyayı yükleyin')
+        file = st.file_uploader('Dosyayı sürükleyin yada yükleyin', type=["jpeg"], help=f'{EXPORT_FILE_FORMAT} ye çevrilecek dosyayı yükleyin')
         n_main_colors = st.slider('Renk sayısı', 1,5,5,1)
         step = st.slider('Mesh sıklığı (pixel)', 1,10,1,1)
         
-        file_list = os.listdir(path=path.replace('files', 'stl'))
+        file_list = os.listdir(path=path.replace('files', EXPORT_FILE_FORMAT))
          # Display chat titles and delete icons
-        st.write('Oluşturulan STL dosyası:')
+        st.write(f'Oluşturulan {EXPORT_FILE_FORMAT} dosyası:')
         reversed_keys = reversed(list(file_list))
         for fn in reversed_keys:
             empt = st.empty()
@@ -120,7 +175,7 @@ def main():
                 if st.button(f'Eminmisiniz... \n\n{fn}?', key="custom_button"):
                     # Store the id of the chat we're deleting
                     print(f'Delete chat is {fn}')
-                    os.remove(f"data/stl/{fn}")
+                    os.remove(f"data/{EXPORT_FILE_FORMAT}/{fn}")
                     del file_list[file_list.index(fn)]
                     del st.session_state['delete']  # Exit delete mode after confirmation
                     
@@ -133,7 +188,7 @@ def main():
         # Convert RGBA image to RGB mode
         image = image.convert('RGB')
         ratio = image.size[0] / image.size[1]
-        new_width = 518
+        new_width = 518 # image.size[0] # 518 
         new_height = int(new_width / ratio)
         image = image.resize((new_width, new_height))
         image.save(f'{path}/{file.name}')
@@ -154,7 +209,9 @@ def main():
                 
         button=st.button('Yan panelde verilen yüksekliklere göre çevir ')
         if button:
-            calculate_stl(converted_pixels, main_colors, heights, step)
+            ## convert jpg tp gltf
+            convert_jpg_to_gltf(converted_pixels, main_colors, heights, step)
+            
         st.write('Renk kodları:')
         st.write(main_colors)
         st.image(converted_pixels, 'converted_pixels')

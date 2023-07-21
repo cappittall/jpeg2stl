@@ -11,8 +11,8 @@ from openai_functions import FUNCTIONS_MAPPING
 
 load_env()
 
-MODEL_NAME = "gpt-3.5-turbo-0613"
-MODEL_TEMPERATURE = 0.3
+MODEL_NAME = "gpt-4"
+MODEL_TEMPERATURE = 1
 FUNCTION_CALL = "auto"
 
 

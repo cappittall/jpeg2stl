@@ -1,0 +1,138 @@
+{
+  "asset": {
+    "generator": "pygltflib@v1.15.6",
+    "version": "2.0"
+  },
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.996078431372549,
+          0.996078431372549,
+          0.996078431372549
+        ],
+        "metallicFactor": 1.0,
+        "roughnessFactor": 1.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": false,
+      "name": "[254 254 254]"
+    },
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.00784313725490196,
+          0.11372549019607843,
+          0.9411764705882353
+        ],
+        "metallicFactor": 1.0,
+        "roughnessFactor": 1.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": false,
+      "name": "[  2  29 240]"
+    },
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.011764705882352941,
+          0.00784313725490196,
+          0.01568627450980392
+        ],
+        "metallicFactor": 1.0,
+        "roughnessFactor": 1.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": false,
+      "name": "[3 2 4]"
+    },
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9882352941176471,
+          0.984313725490196,
+          0.3333333333333333
+        ],
+        "metallicFactor": 1.0,
+        "roughnessFactor": 1.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": false,
+      "name": "[252 251  85]"
+    },
+    {
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.8941176470588236,
+          0.33725490196078434,
+          0.25098039215686274
+        ],
+        "metallicFactor": 1.0,
+        "roughnessFactor": 1.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "alphaCutoff": 0.5,
+      "doubleSided": false,
+      "name": "[228  86  64]"
+    }
+  ],
+  "scenes": [
+    {
+      "nodes": [
+        {
+          "mesh": {
+            "primitives": [
+              {
+                "attributes": {
+                  "POSITION": {
+                    "bufferView": {
+                      "buffer": {},
+                      "byteOffset": 0
+                    },
+                    "byteOffset": 0,
+                    "componentType": 5126,
+                    "normalized": false,
+                    "count": 2640621,
+                    "type": "VEC3"
+                  }
+                },
+                "mode": 4,
+                "material": 0
+              }
+            ],
+            "name": "mesh"
+          }
+        }
+      ]
+    }
+  ]
+}
