@@ -5,7 +5,6 @@ import os
 
 import streamlit as st
 import numpy as np 
-import cv2
 from app import generate_colors
 from oauth2client.service_account import ServiceAccountCredentials
 from google.cloud import vision_v1
@@ -73,14 +72,5 @@ if image_file is not None:
     # Convert to NumPy array
     img_array = np.asarray(_img)  
     
-    # Convert RGB to BGR for OpenCV
-    img = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR) 
-    # Get unique colors
-    _, _, unique_colors = generate_colors(img)
-    
-    st.write('Base colors..')
-    for color in unique_colors:
-        # Display the color as a 15x15 colored box
-        st.image(Image.fromarray(np.tile(color, (25, 25, 1)).astype(np.uint8)), caption='', width=40, use_column_width=False)
-    st.write(unique_colors)
+ 
    
