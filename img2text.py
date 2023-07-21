@@ -19,7 +19,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = SERVICE_ACCOUNT_FILE
 # Set the path to the Tesseract executable (change this to your installation path)
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
-st.title("JPEG to 3D Printable File Converter")
+st.title("JPEG to Text Converter")
 
 
 def pil_image_to_gcv_image(pil_image):
