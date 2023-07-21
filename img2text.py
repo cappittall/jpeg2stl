@@ -4,9 +4,9 @@ import io
 import os
 
 import streamlit as st
-import numpy as np 
-from app import generate_colors
-from oauth2client.service_account import ServiceAccountCredentials
+
+# from app import generate_colors
+# from oauth2client.service_account import ServiceAccountCredentials
 from google.cloud import vision_v1
 from google.cloud.vision_v1 import types
 
@@ -69,8 +69,7 @@ if image_file is not None:
     print('Extracted text', extracted_text2)
  
     st.write(f'Extracted text with pytesseract:{extracted_text2}')
-    # Convert to NumPy array
-    img_array = np.asarray(_img)  
+
     
  
    
