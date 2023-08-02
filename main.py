@@ -188,7 +188,7 @@ def create_monocolor():
 
 @app.get('/')
 def root(request: Request = None):
-    return ({"test":""})
+    return ({"Error":"memory capacity exceeded"})
     return templates.TemplateResponse("index.html", {"request":request})
     
 @app.post("/img2gltfxxx")
