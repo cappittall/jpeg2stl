@@ -191,7 +191,7 @@ def root(request: Request = None):
     return ({"test":""})
     return templates.TemplateResponse("index.html", {"request":request})
     
-@app.post("/img2gltf")
+@app.post("/img2gltfxxx")
 async def img2gltf(request: Request, file: UploadFile = File(...)):
     # Get the original filename without extension
     original_filename = os.path.splitext(file.filename)[0]
