@@ -188,10 +188,10 @@ def create_monocolor():
 
 @app.get('/')
 def root(request: Request = None):
-    return ({"Error":"memory capacity exceeded"})
+    # return ({"Error":"memory capacity exceeded"})
     return templates.TemplateResponse("index.html", {"request":request})
     
-@app.post("/img2gltfxxx")
+@app.post("/img2gltf")
 async def img2gltf(request: Request, file: UploadFile = File(...)):
     # Get the original filename without extension
     original_filename = os.path.splitext(file.filename)[0]
