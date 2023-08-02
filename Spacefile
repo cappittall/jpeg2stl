@@ -1,0 +1,11 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+# token z6cQi1L6_rpD3xmA7Q8wQaajR4mMTr48b1pPBtpkK
+v: 0
+micros:
+  - name: destjil
+    src: ./
+    engine: python3.9
+    primary: true
+    run: uvicorn main:app
+    public_routes:
+      - "/*"
