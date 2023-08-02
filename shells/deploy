@@ -6,4 +6,4 @@
 
 git add .
 git commit -m "Deployin my  "
-git push heroku master --force
+git push heroku main
