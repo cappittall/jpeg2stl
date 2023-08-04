@@ -1,104 +1,116 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Dosya yükleme </title>
-<link rel="icon" type="image/png" href="data/img/favicon.png">
-<link rel="stylesheet" href="/static/css/style.css">
-<script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>Dosya yükleme </title>
+  <link rel="icon" type="image/png" href="data/img/favicon.png">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 
 </head>
 
 <body>
-    <div class="file-upload">
-    <button class="file-upload-btn" type="button" onclick="$('.file-upload-input').trigger( 'click' )">Resim Ekle</button>
+  <div class="file-upload">
+    <button class="file-upload-btn" type="button" onclick="$('.file-upload-input').trigger( 'click' )">Resim
+      Ekle</button>
     <div>
-        <div class="image-upload-wrap">
-            <input class="file-upload-input" type='file' accept="image/*" />
-            <div class="drag-text">
-                <h3>Bir dosyayı sürükleyip bırakın veya Resim Ekle'yi seçin</h3>
-            </div>
+      <div class="image-upload-wrap">
+        <input class="file-upload-input" type='file' accept="image/*" />
+        <div class="drag-text">
+          <h3>Bir dosyayı sürükleyip bırakın veya Resim Ekle'yi seçin</h3>
         </div>
-        <div class="file-upload-content">
-            <img class="file-upload-image" src="#" alt="your image" />
-            <br>
-            <div class="image-title-wrap">
-                <button type="button" onclick="loadUpload();" class="add-image">  Yükleyin </button>
-            </div>
-            <div class="image-title-wrap">
-                <button type="button" onclick="removeUpload()" class="remove-image"> <span class="image-title"></span> Dosyasını Silin</button>
-            </div>
+
+      </div>
+
+      <!-- Button with "I" (information) -->
+      <div class="position-fixed" style="top: 10px; right: 10px; z-index: 1000;">
+        <button class="btn btn-info btn-lg" style="background:rgb(177, 143, 51) !important;" onclick="getHelpPage()">Yardım</button>
+      </div>
+      <div class="file-upload-content">
+        <img class="file-upload-image" src="#" alt="your image" />
+        <br>
+        <div class="image-title-wrap">
+          <button type="button" onclick="loadUpload();" class="add-image"> Yükleyin </button>
         </div>
-        <!-- Spinner  -->
-        <div id="spinner" class="spinner" style="display:none;">
-            <img src="data/img/wedges.gif" alt="Loading..." />
+        <div class="image-title-wrap">
+          <button type="button" onclick="removeUpload()" class="remove-image"> <span class="image-title"></span>
+            Dosyasını Silin</button>
         </div>
-        <!-- Download link -->
-        <div id="download-link-container" class="text-center mt-4">
-            <a id="download-link" href="" class="btn btn-green" style="display:none;">
-                <i class="fas fa-download"></i> İndir
-            </a>
-            <div id="download-link-info" style="display:none;">
-                <br> 
-                İndirdiğiniz .gltf ve .bin (hepsini yükleyin) <a href="https://gltf-viewer.donmccurdy.com/" target="_blank"> Linkinde</a> test edebilirsiniz. 
-                <br><hr>
-                Sorularınız için, Tel 0(532) 602 3450 
-                <hr>
-                
-            </div>
+
+      </div>
+      <!-- Spinner  -->
+      <div id="spinner" class="spinner" style="display:none;">
+        <img src="data/img/wedges.gif" alt="Loading..." />
+      </div>
+      <!-- Download link -->
+      <div id="download-link-container" class="text-center mt-4">
+        <a id="download-link" href="" class="btn btn-green" style="display:none;">
+          <i class="fas fa-download"></i> İndir
+        </a>
+        <div id="download-link-info" style="display:none;">
+          <br>
+          İndirdiğiniz .gltf ve .bin (hepsini yükleyin) <a href="https://gltf-viewer.donmccurdy.com/" target="_blank">
+            Linkinde</a> test edebilirsiniz.
+          <br>
+          <hr>
+          Sorularınız için, Tel 0(532) 602 3450
+          <hr>
+
         </div>
+      </div>
     </div>
 
-<script>
+    <script>
 
-    function readURL(input) {
+      function readURL(input) {
         if (input.files && input.files[0]) {
-      
+
           var reader = new FileReader();
-      
-          reader.onload = function(e) {
+
+          reader.onload = function (e) {
             $('.image-upload-wrap').hide();
             $('.file-upload-image').attr('src', e.target.result);
             $('.file-upload-content').show();
             $('.image-title').html(input.files[0].name);
           };
-      
+
           reader.readAsDataURL(input.files[0]);
-      
+
         } else {
           removeUpload();
         }
       }
-      
+
       // 
       function removeUpload() {
         $('.file-upload-input').replaceWith($('.file-upload-input').clone());
         $('.file-upload-content').hide();
         $('.image-upload-wrap').show();
-      
+
         $('.image-upload-wrap').bind('dragover', function () {
-                $('.image-upload-wrap').addClass('image-dropping');
-            });
-            $('.image-upload-wrap').bind('dragleave', function () {
-                $('.image-upload-wrap').removeClass('image-dropping');
+          $('.image-upload-wrap').addClass('image-dropping');
+        });
+        $('.image-upload-wrap').bind('dragleave', function () {
+          $('.image-upload-wrap').removeClass('image-dropping');
         });
       }
 
       async function loadUpload() {
         // Show spinner
         document.getElementById('spinner').style.display = 'block';
-      
+
         var fileInput = document.querySelector('.file-upload-input');
         var file = fileInput.files[0];
         var formData = new FormData();
         formData.append('file', file); // 'file' is the name you used in the FastAPI endpoint
-      
+
         try {
           var response = await fetch('/img2gltf', {
             method: 'POST',
             body: formData
           });
-      
+
           if (response.ok) {
             var data = await response.json();
             // Handle success, update the download link
@@ -108,7 +120,7 @@
             var downloadLinkInfo = document.getElementById('download-link-info');
             downloadLinkInfo.style.display = 'block'; // Show the download link
 
-            
+
           } else {
             // Handle errors
             alert('Failed to upload the image');
@@ -117,19 +129,25 @@
           // Handle network errors
           alert('Network error, please try again later');
         }
-      
+
         // Hide spinner
         document.getElementById('spinner').style.display = 'none';
       }
-    // Add this code to the end of your script
-    document.addEventListener('DOMContentLoaded', function() {
+      // Add this code to the end of your script
+      document.addEventListener('DOMContentLoaded', function () {
         var fileInput = document.querySelector('.file-upload-input');
         if (fileInput) {
-        fileInput.addEventListener('change', function() {
+          fileInput.addEventListener('change', function () {
             readURL(this);
-        });
+          });
         }
-    });
-</script>
+      });
+
+      function getHelpPage() {
+        window.location.href = '/readme';
+
+      }
+    </script>
 </body>
+
 </html>
