@@ -124,6 +124,13 @@ color_to_height = {
 
 3D modeller, GLTF, OBJ ve PLY ( # ile yorumlanmış) gibi farklı dosya formatlarında dışa aktarılabilir. (3D models can be exported in different file formats such as GLTF, OBJ, and PLY (commented out).)
 
+## 3D Model ölçüleri (3D Model sizes)
+
+```python
+    # 3D modelin toplam boyutunu tanımla (Define the total size of the 3D model in mm)
+    total_size = 1200
+```
+
 ## Statik Dosya Sunumu (Static File Serving)
 
 Uygulama, statik dosyaları sunabilir, bu sayede dönüştürülen 3D modellere erişilebilir. (The application can serve static files, allowing access to the converted 3D models.)
@@ -132,8 +139,4 @@ Uygulama, statik dosyaları sunabilir, bu sayede dönüştürülen 3D modellere 
 
 Daha fazla bilgi veya yardım için, lütfen bizimle iletişime geçin. (For more information or assistance, please contact us.)
 
-Hakan Çetin
 
-E-Mail: <netcat16@gmail.com>
-
-Tel: +90(532) 602 3450

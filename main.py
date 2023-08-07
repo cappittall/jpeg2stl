@@ -1,4 +1,6 @@
 import warnings
+from mangum import Mangum
+
 from fastapi.templating import Jinja2Templates
 import markdown
 import numpy as np
@@ -135,64 +137,6 @@ def create_block(x, y, height):
     ]
     return trimesh.Trimesh(vertices=vertices, faces=faces)
 
-def create_colorfull():
-    # Create an array to store the mapped heights for the resized image
-    resized_mapped_heights = np.zeros((resized_image_array.shape[0], resized_image_array.shape[1]), dtype=np.float32)
-    # Renkli blokları birleştirerek 3D modeli oluştur (Create the 3D model by combining the blocks for the resized image with color)
-    resized_meshes_with_color = []
-    for i in range(resized_image_array.shape[0]):
-        for j in range(resized_image_array.shape[1]):
-            # En yakın önceden tanımlanmış rengi bul (Find the closest predefined color)
-            pixel_color = resized_image_array[i, j][:3]
-            closest_color = find_closest_color(pixel_color)
-            height = color_to_height[closest_color]
-            resized_mapped_heights[i, j] = height
-            
-            # Vertex renkleri için renkleri normalleştir (Normalize color for vertex colors)
-            normalized_color = np.array(closest_color) / 255.0
-            
-            x = j * resized_block_width
-            y = i * resized_block_length
-            block = create_block_with_color(x, y, height, normalized_color)
-            resized_meshes_with_color.append(block)
-
-    # Tüm blokları tek bir mesh'e birleştir (Combine all the blocks into a single mesh)
-    resized_final_mesh_with_color = trimesh.util.concatenate(resized_meshes_with_color)
-
-    # GLTF'ye aktar (Export to GLTF)
-    output_path_with_color = "output_with_color2.gltf"
-    resized_final_mesh_with_color.export(output_path_with_color)
-
-    # Export to OBJ
-    output_path_with_color_obj = "output_with_color2.obj"
-    resized_final_mesh_with_color.export(output_path_with_color_obj, file_type='obj')
-
-    # PLY'ye aktar (Export to PLY)
-    # output_path_with_color_ply = "output_with_color2.ply"
-    # resized_final_mesh_with_color.export(output_path_with_color_ply, file_type='ply')
-    
-def create_monocolor():
-    # Yeniden boyutlandırılan resim için blokları birleştirerek 3D modeli oluştur (Create the 3D model by combining the blocks for the resized image)
-    resized_meshes = []
-    for i in range(resized_image_array.shape[0]):
-        for j in range(resized_image_array.shape[1]):
-            height = resized_mapped_heights[i, j]
-            x = j * resized_block_width
-            y = i * resized_block_length
-            block = create_block(x, y, height)
-            resized_meshes.append(block)
-
-    # Tüm blokları tek bir mesh'e birleştir (Combine all the blocks into a single mesh)
-    resized_final_mesh = trimesh.util.concatenate(resized_meshes)
-
-    # GLTF'ye aktar (Export to GLTF)
-    output_path = "output.gltf"
-    resized_final_mesh.export(output_path)
-    
-    # Export to OBJ
-    output_path_obj = "output.obj"
-    resized_final_mesh.export(output_path_obj, file_type='obj')
-
 @app.get('/')
 def root(request: Request = None):
     # return ({"Error":"bellek kapasitesi aşıldı"} - Return an error response if the memory capacity is exceeded)
@@ -230,10 +174,48 @@ def read_file():
         </html>
         """
         return HTMLResponse(content=styled_html)
-    
-    
-    
 
+def create_colorfull():
+    # Create an array to store the mapped heights for the resized image
+    resized_mapped_heights = np.zeros((resized_image_array.shape[0], resized_image_array.shape[1]), dtype=np.float32)
+    # Renkli blokları birleştirerek 3D modeli oluştur (Create the 3D model by combining the blocks for the resized image with color)
+    resized_meshes_with_color = []
+    for i in range(resized_image_array.shape[0]):
+        for j in range(resized_image_array.shape[1]):
+            # En yakın önceden tanımlanmış rengi bul (Find the closest predefined color)
+            pixel_color = resized_image_array[i, j][:3]
+            closest_color = find_closest_color(pixel_color)
+            height = color_to_height[closest_color]
+            resized_mapped_heights[i, j] = height
+            
+            # Vertex renkleri için renkleri normalleştir (Normalize color for vertex colors)
+            normalized_color = np.array(closest_color) / 255.0
+            
+            x = j * resized_block_width
+            y = i * resized_block_length
+            block = create_block_with_color(x, y, height, normalized_color)
+            resized_meshes_with_color.append(block)
+
+    # Tüm blokları tek bir mesh'e birleştir (Combine all the blocks into a single mesh)
+    resized_final_mesh_with_color = trimesh.util.concatenate(resized_meshes_with_color)
+
+    # GLTF'ye aktar (Export to GLTF)
+    output_path_with_color = "output_with_color2.gltf"
+    resized_final_mesh_with_color.export(output_path_with_color)
+
+    # Export to OBJ
+    output_path_with_color_obj = "output_with_color2.obj"
+    resized_final_mesh_with_color.export(output_path_with_color_obj, file_type='obj')
+    
+    # Export to STL
+    output_path_with_color_stl = "output_with_color2.stl"
+    resized_final_mesh_with_color.export(output_path_with_color_stl, file_type='stl')
+
+
+    # PLY'ye aktar (Export to PLY)
+    # output_path_with_color_ply = "output_with_color2.ply"
+    # resized_final_mesh_with_color.export(output_path_with_color_ply, file_type='ply')
+    
 @app.post("/img2gltf")
 async def img2gltf(request: Request, file: UploadFile = File(...)):
     # Uzantısı olmadan yüklenen dosyanın adını al (Get the original filename without extension)
@@ -259,8 +241,8 @@ async def img2gltf(request: Request, file: UploadFile = File(...)):
         # Resmi işle (Process the image)
         global image
         image = Image.open(image_path)
-        # create_monocolor() # Gri renk için (For grey color)
-        create_colorfull()  # Varolan işlevinizi çağırarak GLTF dosyasını oluştur (Call your existing function to create the GLTF file)
+        # Varolan işlevinizi çağırarak GLTF dosyasını oluştur (Call your existing function to create the GLTF file)
+        create_colorfull()  
         
         # Orijinal dosya adına göre GLTF ve BIN dosya adlarını tanımla (Define the GLTF and BIN file names based on the original filename)
         gltf_filename = f"{original_filename}.gltf"
@@ -269,19 +251,27 @@ async def img2gltf(request: Request, file: UploadFile = File(...)):
         # Define the OBJ file name based on the original filename
         obj_filename = f"{original_filename}.obj"
         
+        # Define the STL file name based on the original filename
+        stl_filename = f"{original_filename}.stl"
+        
         # GLTF dosyasını yeniden adlandır ve belirli klasöre taşı (Rename the GLTF file and move to the specific folder)
         shutil.move("output_with_color2.gltf", folder_path / gltf_filename)
         
         # Rename the OBJ file and move it to the specific folder
         shutil.move("output_with_color2.obj", folder_path / obj_filename)  # For the colored version
-        # shutil.move("output.obj", folder_path / obj_filename)  # For the monochrome version
+
+        # Rename the STL file and move it to the specific folder
+        shutil.move("output_with_color2.stl", folder_path / stl_filename)  # For the colored version
 
         # GLTF ve BIN dosyalarını ZIP olarak sıkıştır (Zip the GLTF and BIN files)
         with ZipFile(zip_path, 'w') as zipf:
             zipf.write(folder_path / gltf_filename, arcname=gltf_filename)  # Set the relative path inside ZIP
             # Add the OBJ file to the ZIP
             zipf.write(folder_path / obj_filename, arcname=obj_filename)  # Set the relative path inside ZIP
- 
+
+            # Add the STL file to the ZIP
+            zipf.write(folder_path / stl_filename, arcname=stl_filename)  # Set the relative path inside ZIP
+
             # Tüm BIN dosyalarını dahil et (Include all BIN files)
             bin_files = glob.glob("gltf_buffer_*.bin")
             for bin_file in bin_files:
@@ -294,4 +284,4 @@ async def img2gltf(request: Request, file: UploadFile = File(...)):
         # Yanıtı dosya yolunu ve indirme bağlantısını içeren JSON olarak döndür (Return the response as JSON with the file path and download link)
         return JSONResponse(content={"file": str(zip_path), "download_link": download_link, 'Hakan cep':'05326023450'})
 
-
+handler = Mangum(app)
