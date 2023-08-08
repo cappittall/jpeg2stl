@@ -6,4 +6,4 @@ trimesh
 jinja2
 uvicorn[standard]
 python-multipart
-# mangum==0.17.0
+mangum
