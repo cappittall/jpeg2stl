@@ -1,3 +1,4 @@
+import sys
 import warnings
 from mangum import Mangum
 
@@ -20,6 +21,7 @@ import tempfile
 import os
 from zipfile import ZipFile
 import glob
+import cv2
 
 app = FastAPI()
 # Verilerin klasör olarak sunulması (Serve the data directory as static files)
@@ -42,23 +44,46 @@ app.add_middleware(
 # Renk-yükseklik eşleştirmesini tanımla (Define the color-to-height mapping in millimeters)
 color_to_height = {
     (0, 0, 0): 5,   # siyah (black)
-    (255, 255, 0): 25, # sarı (yellow)
-    (0, 0, 255): 40,  # mavi (blue)
-    (255, 255, 255): 30, # beyaz (white)
-    (255, 0, 0): 50   # kırmızı (red)
+    (255, 255, 0): 10, # sarı (yellow)
+    (0, 0, 255): 15,  # mavi (blue)
+    (255, 255, 255): 20, # beyaz (white)
+    (255, 0, 0): 25   # kırmızı (red)
 }
 
-def process_image(image_path):
-    global image, image_array, predefined_colors, resized_image, resized_image_array, resized_mapped_heights, resized_block_width, resized_block_length
+def preprocess_image(image_path):
+    # Read the image
+    
+    image = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
+    
+    if image is not None:
+        print("Image loaded successfully.")
+    else:
+        print("Failed to load image.")
+        
+    # If it's a 4-channel image (RGBA), convert to RGB
+    if image.shape[2] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+
+    # Apply a Gaussian blur to reduce noise
+    image = cv2.GaussianBlur(image, (5, 5), 0)
+    # Convert BGR to RGB
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # Mirror the image horizontally
+    image = cv2.flip(image, 1)
+    return image
+
+def process_image(image):
+    global image_array, predefined_colors, resized_image, resized_image_array, resized_mapped_heights, resized_block_width, resized_block_length
     # Resmi yükle (Load the image)
-    image = Image.open(image_path)
+    
     # Resmi NumPy dizisine dönüştür (Convert the image to a NumPy array)
     image_array = np.array(image)
     # Önceden tanımlanmış renkleri belirle (Define predefined colors)
     predefined_colors = np.array(list(color_to_height.keys()))
     # Daha hızlı işleme için resmi küçük bir çözünürlüğe yeniden boyutlandır (Resize the image to a smaller resolution for faster processing)
     resize_factor = 0.1
-    resized_image = image.resize((int(image.width * resize_factor), int(image.height * resize_factor)))
+    height, width = image.shape[:2]
+    resized_image = cv2.resize(image, (int(width * resize_factor), int(height * resize_factor)))
     # Yeniden boyutlandırılan resmi NumPy dizisine dönüştür (Convert the resized image to a NumPy array)
     resized_image_array = np.array(resized_image)
     # Yeniden boyutlandırılan resim için eşleştirilmiş yükseklikleri saklamak için bir dizi oluştur (Create an array to store the mapped heights for the resized image)
@@ -72,7 +97,7 @@ def process_image(image_path):
             resized_mapped_heights[i, j] = color_to_height[closest_color]
 
     # 3D modelin toplam boyutunu tanımla (Define the total size of the 3D model in mm)
-    total_size = 1200
+    total_size = 150
     # Yeniden boyutlandırılmış resim için her bloğun boyutunu hesapla (Calculate the size of each block for the resized image)
     resized_block_width = total_size / resized_image_array.shape[1]
     resized_block_length = total_size / resized_image_array.shape[0]
@@ -115,37 +140,13 @@ def create_block_with_color(x, y, height, color):
     mesh.visual.vertex_colors = vertex_colors
     return mesh
 
-# Renksiz bir 3D blok oluşturan işlev (Function to create a 3D block)
-def create_block(x, y, height):
-    vertices = [
-        [x, y, 0],
-        [x + resized_block_width, y, 0],
-        [x + resized_block_width, y + resized_block_length, 0],
-        [x, y + resized_block_length, 0],
-        [x, y, height],
-        [x + resized_block_width, y, height],
-        [x + resized_block_width, y + resized_block_length, height],
-        [x, y + resized_block_length, height]
-    ]
-    faces = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0, 1, 5, 4],
-        [1, 2, 6, 5],
-        [2, 3, 7, 6],
-        [3, 0, 4, 7]
-    ]
-    return trimesh.Trimesh(vertices=vertices, faces=faces)
-
 @app.get('/')
 def root(request: Request = None):
     # return ({"Error":"bellek kapasitesi aşıldı"} - Return an error response if the memory capacity is exceeded)
     return templates.TemplateResponse("index.html", {"request":request})
 
-
-
 @app.get("/readme", response_class=HTMLResponse)
-def read_file():
+def readme_file():
     file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "README.md")
     with open(file_path, "r", encoding="utf-8") as file:
         readme_content = file.read()
@@ -234,13 +235,15 @@ async def img2gltf(request: Request, file: UploadFile = File(...)):
         
         with open(image_path, 'wb') as buffer:
             shutil.copyfileobj(file.file, buffer)
+            
 
         # Yüklenen resmi işle (Process the uploaded image)
-        process_image(image_path)
+
+        image = preprocess_image(image_path)
+
+        process_image(image)
     
         # Resmi işle (Process the image)
-        global image
-        image = Image.open(image_path)
         # Varolan işlevinizi çağırarak GLTF dosyasını oluştur (Call your existing function to create the GLTF file)
         create_colorfull()  
         
@@ -285,3 +288,4 @@ async def img2gltf(request: Request, file: UploadFile = File(...)):
         return JSONResponse(content={"file": str(zip_path), "download_link": download_link, 'Hakan cep':'05326023450'})
 
 handler = Mangum(app)
+

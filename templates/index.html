@@ -84,6 +84,8 @@
 
       // 
       function removeUpload() {
+        window.location.reload()
+        /*
         $('.file-upload-input').replaceWith($('.file-upload-input').clone());
         $('.file-upload-content').hide();
         $('.image-upload-wrap').show();
@@ -93,7 +95,7 @@
         });
         $('.image-upload-wrap').bind('dragleave', function () {
           $('.image-upload-wrap').removeClass('image-dropping');
-        });
+        });*/
       }
 
       async function loadUpload() {
