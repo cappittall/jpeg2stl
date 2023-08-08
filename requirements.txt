@@ -7,3 +7,7 @@ jinja2
 uvicorn[standard]
 python-multipart
 mangum
+markdown
+opencv-python
+
+
