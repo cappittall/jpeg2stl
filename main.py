@@ -11,7 +11,7 @@ from scipy.spatial.distance import cdist
 from scipy.spatial import distance
 
 from fastapi import Request
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -218,7 +218,21 @@ def create_colorfull():
     # resized_final_mesh_with_color.export(output_path_with_color_ply, file_type='ply')
     
 @app.post("/img2gltf")
-async def img2gltf(request: Request, file: UploadFile = File(...)):
+async def img2gltf(request: Request, 
+                file: UploadFile = File(...),
+                black_height: int = Form(5),
+                yellow_height: int = Form(10),
+                blue_height: int = Form(15),
+                white_height: int = Form(20),
+                red_height: int = Form(25)):
+    
+    # Update the color_to_height dictionary with new values
+    color_to_height[(0, 0, 0)] = black_height
+    color_to_height[(255, 255, 0)] = yellow_height
+    color_to_height[(0, 0, 255)] = blue_height
+    color_to_height[(255, 255, 255)] = white_height
+    color_to_height[(255, 0, 0)] = red_height
+    print("color_to_height",color_to_height)
     # Uzantısı olmadan yüklenen dosyanın adını al (Get the original filename without extension)
     original_filename = os.path.splitext(file.filename)[0]
     # İstekten temel URL'yi al (Get the base URL from the request)

@@ -59,7 +59,14 @@
 
         </div>
       </div>
-    </div>
+      <form id="color-heights-form">
+        <label>Siyah Y: <input type="number" name="black_height" value="5" onchange="saveColorHeight('black_height', this.value)"/></label><br>
+        <label>Sarı Y. : <input type="number" name="yellow_height" value="10" onchange="saveColorHeight('yellow_height', this.value)"/></label><br>
+        <label>Mavi Y : <input type="number" name="blue_height" value="15" onchange="saveColorHeight('blue_height', this.value)"/></label><br>
+        <label>Beyaz : <input type="number" name="white_height" value="20" onchange="saveColorHeight('white_height', this.value)"/></label><br>
+        <label>Kırmızı: <input type="number" name="red_height" value="25" onchange="saveColorHeight('red_height', this.value)"/></label><br>
+      </form>
+  </div>
 
     <script>
 
@@ -106,7 +113,14 @@
         var file = fileInput.files[0];
         var formData = new FormData();
         formData.append('file', file); // 'file' is the name you used in the FastAPI endpoint
-
+        // Get the color heights from the form
+        var form = document.getElementById('color-heights-form');
+        formData.append('black_height', form.elements['black_height'].value);
+        formData.append('yellow_height', form.elements['yellow_height'].value);
+        formData.append('blue_height', form.elements['blue_height'].value);
+        formData.append('white_height', form.elements['white_height'].value);
+        formData.append('red_height', form.elements['red_height'].value);
+        
         try {
           var response = await fetch('/img2gltf', {
             method: 'POST',
@@ -144,6 +158,32 @@
           });
         }
       });
+
+      function loadColorHeight(name) {
+        return localStorage.getItem(name) || null;
+      }
+      
+      function saveColorHeight(name, value) {
+        console.log (name, value)
+        localStorage.setItem(name, value);
+      }
+
+      function loadSavedColorHeights() {
+        var colorHeights = ['black_height', 'yellow_height', 'blue_height', 'white_height', 'red_height'];
+        var defaultValues = [5, 10, 15, 20, 25];
+
+        for (var i = 0; i < colorHeights.length; i++) {
+          var savedValue = loadColorHeight(colorHeights[i]);
+          if (savedValue !== null) {
+            document.getElementsByName(colorHeights[i])[0].value = savedValue;
+          } else {
+            document.getElementsByName(colorHeights[i])[0].value = defaultValues[i];
+          }
+        }
+      }
+
+      // Call this function when the page loads
+      document.addEventListener('DOMContentLoaded', loadSavedColorHeights);
 
       function getHelpPage() {
         window.location.href = '/readme';

@@ -1,5 +1,6 @@
 .env
-extras
+extras/
 *.bin
-
 .vercel
+data/*
+!data/img/*
