@@ -139,4 +139,6 @@ Uygulama, statik dosyaları sunabilir, bu sayede dönüştürülen 3D modellere 
 
 Daha fazla bilgi veya yardım için, lütfen bizimle iletişime geçin. (For more information or assistance, please contact us.)
 
-
+Hakan Çetin 
+Mail: netcat16@gmail.com 
+Tel: +90(532) 602 3450 

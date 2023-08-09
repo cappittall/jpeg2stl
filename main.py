@@ -26,8 +26,9 @@ import cv2
 app = FastAPI()
 # Verilerin klasör olarak sunulması (Serve the data directory as static files)
 static_dir = os.path.join(os.path.dirname(__file__), 'static')
-app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
+data_dir = os.path.join(os.path.dirname(__file__), 'data')
+app.mount("/data", StaticFiles(directory=data_dir), name="data")
 
 templates = Jinja2Templates(directory="templates")
 warnings.filterwarnings('ignore')
