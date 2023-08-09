@@ -149,15 +149,7 @@
         // Hide spinner
         document.getElementById('spinner').style.display = 'none';
       }
-      // Add this code to the end of your script
-      document.addEventListener('DOMContentLoaded', function () {
-        var fileInput = document.querySelector('.file-upload-input');
-        if (fileInput) {
-          fileInput.addEventListener('change', function () {
-            readURL(this);
-          });
-        }
-      });
+
 
       function loadColorHeight(name) {
         return localStorage.getItem(name) || null;
@@ -182,13 +174,22 @@
         }
       }
 
-      // Call this function when the page loads
-      document.addEventListener('DOMContentLoaded', loadSavedColorHeights);
-
       function getHelpPage() {
         window.location.href = '/readme';
 
       }
+
+      // Add this code to the end of your script
+      document.addEventListener('DOMContentLoaded', function () {
+        var fileInput = document.querySelector('.file-upload-input');
+        if (fileInput) {
+          fileInput.addEventListener('change', function () {
+            readURL(this);
+          });
+        }
+        loadSavedColorHeights()
+      });
+      
     </script>
 </body>
 

@@ -54,7 +54,8 @@ def preprocess_image(image_path):
     # Read the image
     
     image = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
-    
+    im_name = image_path.name
+    save_im_name = str(image_path).replace(im_name, f"clean_{im_name}")    
     if image is not None:
         print("Image loaded successfully.")
     else:
@@ -66,10 +67,12 @@ def preprocess_image(image_path):
 
     # Apply a Gaussian blur to reduce noise
     image = cv2.GaussianBlur(image, (5, 5), 0)
+    cv2.imwrite(save_im_name, image)
     # Convert BGR to RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     # Mirror the image horizontally
     image = cv2.flip(image, 1)
+    
     return image
 
 def process_image(image):
@@ -201,8 +204,8 @@ def create_colorfull():
     resized_final_mesh_with_color = trimesh.util.concatenate(resized_meshes_with_color)
 
     # GLTF'ye aktar (Export to GLTF)
-    output_path_with_color = "output_with_color2.gltf"
-    resized_final_mesh_with_color.export(output_path_with_color)
+    output_path_with_color_gltf = "output_with_color2.gltf"
+    resized_final_mesh_with_color.export(output_path_with_color_gltf, file_type="gltf")
 
     # Export to OBJ
     output_path_with_color_obj = "output_with_color2.obj"
@@ -232,7 +235,6 @@ async def img2gltf(request: Request,
     color_to_height[(0, 0, 255)] = blue_height
     color_to_height[(255, 255, 255)] = white_height
     color_to_height[(255, 0, 0)] = red_height
-    print("color_to_height",color_to_height)
     # Uzantısı olmadan yüklenen dosyanın adını al (Get the original filename without extension)
     original_filename = os.path.splitext(file.filename)[0]
     # İstekten temel URL'yi al (Get the base URL from the request)
@@ -260,7 +262,7 @@ async def img2gltf(request: Request,
         # Resmi işle (Process the image)
         # Varolan işlevinizi çağırarak GLTF dosyasını oluştur (Call your existing function to create the GLTF file)
         create_colorfull()  
-        
+                
         # Orijinal dosya adına göre GLTF ve BIN dosya adlarını tanımla (Define the GLTF and BIN file names based on the original filename)
         gltf_filename = f"{original_filename}.gltf"
         zip_path = folder_path / f"{original_filename}.zip"
@@ -271,9 +273,10 @@ async def img2gltf(request: Request,
         # Define the STL file name based on the original filename
         stl_filename = f"{original_filename}.stl"
         
+            
         # GLTF dosyasını yeniden adlandır ve belirli klasöre taşı (Rename the GLTF file and move to the specific folder)
         shutil.move("output_with_color2.gltf", folder_path / gltf_filename)
-        
+
         # Rename the OBJ file and move it to the specific folder
         shutil.move("output_with_color2.obj", folder_path / obj_filename)  # For the colored version
 
@@ -282,19 +285,20 @@ async def img2gltf(request: Request,
 
         # GLTF ve BIN dosyalarını ZIP olarak sıkıştır (Zip the GLTF and BIN files)
         with ZipFile(zip_path, 'w') as zipf:
-            zipf.write(folder_path / gltf_filename, arcname=gltf_filename)  # Set the relative path inside ZIP
+            zipf.write( folder_path / gltf_filename, arcname=gltf_filename)  # Set the relative path inside ZIP
             # Add the OBJ file to the ZIP
-            zipf.write(folder_path / obj_filename, arcname=obj_filename)  # Set the relative path inside ZIP
+            zipf.write( folder_path / obj_filename, arcname=obj_filename)  # Set the relative path inside ZIP
 
             # Add the STL file to the ZIP
-            zipf.write(folder_path / stl_filename, arcname=stl_filename)  # Set the relative path inside ZIP
+            zipf.write( folder_path / stl_filename, arcname=stl_filename)  # Set the relative path inside ZIP
 
             # Tüm BIN dosyalarını dahil et (Include all BIN files)
-            bin_files = glob.glob("gltf_buffer_*.bin")
+            bin_files = glob.glob("gltf_buffer_*.bin") 
             for bin_file in bin_files:
                 arcname = os.path.basename(bin_file)  # Dizin olmadan dosya adını al (Get the filename without the directory)
                 zipf.write(bin_file, arcname=arcname)  # ZIP içindeki göreli yolu belirle (Set the relative path inside ZIP)
-
+                shutil.move(bin_file, folder_path / bin_file)
+                
         # İndirme bağlantısını oluştur (Create the download link)
         download_link = f"{base_url}data/{original_filename}/{original_filename}.zip"
 
